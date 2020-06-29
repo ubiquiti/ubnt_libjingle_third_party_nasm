@@ -2,6 +2,7 @@ Name: Netwide Assembler
 Short Name: nasm
 URL: https://www.nasm.us/
 Version: bfa1ed0ae9cb15b54b008431d122db3c22cd45eb
+CPEPrefix: cpe:/a:nasm:netwide_assembler:2.14:rc15
 License: 2-Clause BSD
 License File: LICENSE
 Security Critical: no
