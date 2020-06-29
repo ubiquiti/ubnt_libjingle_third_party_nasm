@@ -8,110 +8,113 @@
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
 
 /* Define to 1 if compiled with the `-fdata-sections' compiler flag */
-/* #undef CFLAG_FDATA_SECTIONS */
+#define CFLAGS_FDATA_SECTIONS 1
 
 /* Define to 1 if compiled with the `-ffunction-sections' compiler flag */
-/* #undef CFLAG_FFUNCTION_SECTIONS */
+#define CFLAGS_FFUNCTION_SECTIONS 1
 
 /* Define to 1 if compiled with the `-fgnu89-inline' compiler flag */
-/* #undef CFLAG_FGNU89_INLINE */
+/* #undef CFLAGS_FGNU89_INLINE */
 
 /* Define to 1 if compiled with the `-flto' compiler flag */
-/* #undef CFLAG_FLTO */
+/* #undef CFLAGS_FLTO */
 
 /* Define to 1 if compiled with the `-fno-common' compiler flag */
-#define CFLAG_FNO_COMMON 1
+#define CFLAGS_FNO_COMMON 1
 
 /* Define to 1 if compiled with the `-fno-omit-frame-pointer' compiler flag */
-/* #undef CFLAG_FNO_OMIT_FRAME_POINTER */
+/* #undef CFLAGS_FNO_OMIT_FRAME_POINTER */
 
 /* Define to 1 if compiled with the `-fsanitize=address' compiler flag */
-/* #undef CFLAG_FSANITIZE_ADDRESS */
+/* #undef CFLAGS_FSANITIZE_ADDRESS */
 
 /* Define to 1 if compiled with the `-fsanitize=undefined' compiler flag */
-/* #undef CFLAG_FSANITIZE_UNDEFINED */
+/* #undef CFLAGS_FSANITIZE_UNDEFINED */
 
 /* Define to 1 if compiled with the `-fvisibility=hidden' compiler flag */
-#define CFLAG_FVISIBILITY_HIDDEN 1
+#define CFLAGS_FVISIBILITY_HIDDEN 1
 
 /* Define to 1 if compiled with the `-fwrapv' compiler flag */
-#define CFLAG_FWRAPV 1
+#define CFLAGS_FWRAPV 1
 
 /* Define to 1 if compiled with the `-ggdb3' compiler flag */
-/* #undef CFLAG_GGDB3 */
+/* #undef CFLAGS_GGDB3 */
 
 /* Define to 1 if compiled with the `-O0' compiler flag */
-/* #undef CFLAG_O0 */
+/* #undef CFLAGS_O0 */
 
 /* Define to 1 if compiled with the `-pedantic' compiler flag */
-#define CFLAG_PEDANTIC 1
+#define CFLAGS_PEDANTIC 1
+
+/* Define to 1 if compiled with the `-pg' compiler flag */
+/* #undef CFLAGS_PG */
 
 /* Define to 1 if compiled with the `-U__STRICT_ANSI__' compiler flag */
-#define CFLAG_U_STRICT_ANSI 1
+#define CFLAGS_U_STRICT_ANSI 1
 
 /* Define to 1 if compiled with the `-W' compiler flag */
-#define CFLAG_W 1
+#define CFLAGS_W 1
 
 /* Define to 1 if compiled with the `-Wall' compiler flag */
-#define CFLAG_WALL 1
+#define CFLAGS_WALL 1
 
 /* Define to 1 if compiled with the `-Wc90-c99-compat' compiler flag */
-/* #undef CFLAG_WC90_C99_COMPAT */
+#define CFLAGS_WC90_C99_COMPAT 1
 
 /* Define to 1 if compiled with the `-Werror' compiler flag */
-/* #undef CFLAG_WERROR */
+/* #undef CFLAGS_WERROR */
 
 /* Define to 1 if compiled with the `-Werror=attributes' compiler flag */
-#define CFLAG_WERROR_ATTRIBUTES 1
+#define CFLAGS_WERROR_ATTRIBUTES 1
 
 /* Define to 1 if compiled with the `-Werror=comment' compiler flag */
-#define CFLAG_WERROR_COMMENT 1
+#define CFLAGS_WERROR_COMMENT 1
 
 /* Define to 1 if compiled with the `-Werror=implicit' compiler flag */
-#define CFLAG_WERROR_IMPLICIT 1
+#define CFLAGS_WERROR_IMPLICIT 1
 
 /* Define to 1 if compiled with the `-Werror=missing-braces' compiler flag */
-#define CFLAG_WERROR_MISSING_BRACES 1
+#define CFLAGS_WERROR_MISSING_BRACES 1
 
 /* Define to 1 if compiled with the `-Werror=missing-declarations' compiler
    flag */
-#define CFLAG_WERROR_MISSING_DECLARATIONS 1
+#define CFLAGS_WERROR_MISSING_DECLARATIONS 1
 
 /* Define to 1 if compiled with the `-Werror=missing-prototypes' compiler flag
    */
-#define CFLAG_WERROR_MISSING_PROTOTYPES 1
+#define CFLAGS_WERROR_MISSING_PROTOTYPES 1
 
 /* Define to 1 if compiled with the `-Werror=pointer-arith' compiler flag */
-#define CFLAG_WERROR_POINTER_ARITH 1
+#define CFLAGS_WERROR_POINTER_ARITH 1
 
 /* Define to 1 if compiled with the `-Werror=return-type' compiler flag */
-#define CFLAG_WERROR_RETURN_TYPE 1
+#define CFLAGS_WERROR_RETURN_TYPE 1
 
 /* Define to 1 if compiled with the `-Werror=strict-prototypes' compiler flag
    */
-#define CFLAG_WERROR_STRICT_PROTOTYPES 1
+#define CFLAGS_WERROR_STRICT_PROTOTYPES 1
 
 /* Define to 1 if compiled with the `-Werror=trigraphs' compiler flag */
-#define CFLAG_WERROR_TRIGRAPHS 1
+#define CFLAGS_WERROR_TRIGRAPHS 1
 
 /* Define to 1 if compiled with the `-Werror=unknown-warning-option' compiler
    flag */
-#define CFLAG_WERROR_UNKNOWN_WARNING_OPTION 1
+/* #undef CFLAGS_WERROR_UNKNOWN_WARNING_OPTION */
 
 /* Define to 1 if compiled with the `-Werror=vla' compiler flag */
-#define CFLAG_WERROR_VLA 1
+#define CFLAGS_WERROR_VLA 1
 
 /* Define to 1 if compiled with the `-Wlong-long' compiler flag */
-#define CFLAG_WLONG_LONG 1
-
-/* Define to 1 if compiled with the `-Wl,--gc-sections' compiler flag */
-/* #undef CFLAG_WL_GC_SECTIONS */
+#define CFLAGS_WLONG_LONG 1
 
 /* Define to 1 if compiled with the `-Wpedantic-ms-format' compiler flag */
-/* #undef CFLAG_WPEDANTIC_MS_FORMAT */
+#define CFLAGS_WPEDANTIC_MS_FORMAT 1
+
+/* Define to 1 if compiled with the `-Wshift-negative-value' compiler flag */
+#define CFLAGS_WSHIFT_NEGATIVE_VALUE 1
 
 /* Define to 1 if compiled with the `-Wstringop-truncation' compiler flag */
-/* #undef CFLAG_WSTRINGOP_TRUNCATION */
+#define CFLAGS_WSTRINGOP_TRUNCATION 1
 
 /* Define to 1 if you have the `access' function. */
 #define HAVE_ACCESS 1
@@ -164,7 +167,7 @@
 /* #undef HAVE_ENDIAN_H */
 
 /* Define to 1 if you have the `faccessat' function. */
-/* #undef HAVE_FACCESSAT */
+#define HAVE_FACCESSAT 1
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -183,7 +186,15 @@
 
 /* Define to 1 if your compiler supports __attribute__((alloc_size)) on
    functions */
-#define HAVE_FUNC_ATTRIBUTE_ALLOC_SIZE 1
+#define HAVE_FUNC_ATTRIBUTE1_ALLOC_SIZE 1
+
+/* Define to 1 if your compiler supports __attribute__((alloc_size)) on
+   functions */
+/* #undef HAVE_FUNC_ATTRIBUTE2_ALLOC_SIZE */
+
+/* Define to 1 if your compiler supports __attribute__((format)) on functions
+   */
+#define HAVE_FUNC_ATTRIBUTE3_FORMAT 1
 
 /* Define to 1 if your compiler supports __attribute__((cold)) on functions */
 #define HAVE_FUNC_ATTRIBUTE_COLD 1
@@ -195,10 +206,6 @@
 /* Define to 1 if your compiler supports __attribute__((error)) on functions
    */
 /* #undef HAVE_FUNC_ATTRIBUTE_ERROR */
-
-/* Define to 1 if your compiler supports __attribute__((format)) on functions
-   */
-#define HAVE_FUNC_ATTRIBUTE_FORMAT 1
 
 /* Define to 1 if your compiler supports __attribute__((malloc)) on functions
    */
@@ -219,11 +226,54 @@
    functions */
 #define HAVE_FUNC_ATTRIBUTE_SENTINEL 1
 
+/* Define to 1 if your compiler supports __attribute__((alloc_size)) on
+   function pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE1_ALLOC_SIZE */
+
+/* Define to 1 if your compiler supports __attribute__((alloc_size)) on
+   function pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE2_ALLOC_SIZE */
+
+/* Define to 1 if your compiler supports __attribute__((format)) on function
+   pointers */
+#define HAVE_FUNC_PTR_ATTRIBUTE3_FORMAT 1
+
+/* Define to 1 if your compiler supports __attribute__((cold)) on function
+   pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE_COLD */
+
+/* Define to 1 if your compiler supports __attribute__((const)) on function
+   pointers */
+#define HAVE_FUNC_PTR_ATTRIBUTE_CONST 1
+
+/* Define to 1 if your compiler supports __attribute__((malloc)) on function
+   pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE_MALLOC */
+
+/* Define to 1 if your compiler supports __attribute__((noreturn)) on function
+   pointers */
+#define HAVE_FUNC_PTR_ATTRIBUTE_NORETURN 1
+
+/* Define to 1 if your compiler supports __attribute__((pure)) on function
+   pointers */
+#define HAVE_FUNC_PTR_ATTRIBUTE_PURE 1
+
+/* Define to 1 if your compiler supports __attribute__((returns_nonnull)) on
+   function pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE_RETURNS_NONNULL */
+
+/* Define to 1 if your compiler supports __attribute__((sentinel)) on function
+   pointers */
+/* #undef HAVE_FUNC_PTR_ATTRIBUTE_SENTINEL */
+
 /* Define to 1 if you have the `getgid' function. */
 #define HAVE_GETGID 1
 
 /* Define to 1 if you have the `getpagesize' function. */
 #define HAVE_GETPAGESIZE 1
+
+/* Define to 1 if you have the `getrlimit' function. */
+#define HAVE_GETRLIMIT 1
 
 /* Define to 1 if you have the `getuid' function. */
 #define HAVE_GETUID 1
@@ -246,11 +296,20 @@
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef HAVE_IO_H */
 
+/* Define to 1 if you have the `isascii' function. */
+#define HAVE_ISASCII 1
+
+/* Define to 1 if you have the `iscntrl' function. */
+#define HAVE_ISCNTRL 1
+
 /* Define to 1 if you have the <machine/endian.h> header file. */
 #define HAVE_MACHINE_ENDIAN_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the `mempcpy' function. */
+/* #undef HAVE_MEMPCPY */
 
 /* Define to 1 if you have a working `mmap' system call. */
 #define HAVE_MMAP 1
@@ -330,11 +389,17 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #define HAVE_SYS_PARAM_H 1
 
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#define HAVE_SYS_RESOURCE_H 1
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
+
+/* Define to 1 if you have the `S_ISREG' function. */
+/* #undef HAVE_S_ISREG */
 
 /* Define to 1 if the system has the type `uintptr_t'. */
 #define HAVE_UINTPTR_T 1
@@ -371,9 +436,6 @@
 
 /* Define to 1 if you have the `_chsize_s' function. */
 /* #undef HAVE__CHSIZE_S */
-
-/* Define to 1 if you have the `_filelengthi64' function. */
-/* #undef HAVE__FILELENGTHI64 */
 
 /* Define to 1 if you have the `_fileno' function. */
 /* #undef HAVE__FILENO */
@@ -414,6 +476,9 @@
 /* Define to 1 if you have the `__builtin_bswap64' intrinsic function. */
 #define HAVE___BUILTIN_BSWAP64 1
 
+/* Define to 1 if you have the `__builtin_choose_expr' intrinsic function. */
+#define HAVE___BUILTIN_CHOOSE_EXPR 1
+
 /* Define to 1 if you have the `__builtin_clz' intrinsic function. */
 #define HAVE___BUILTIN_CLZ 1
 
@@ -437,6 +502,9 @@
 
 /* Define to 1 if you have the `__cpu_to_le64' intrinsic function. */
 /* #undef HAVE___CPU_TO_LE64 */
+
+/* Define to 1 if compiled with the `-Wl,--gc-sections' compiler flag */
+/* #undef LDFLAGS_WL_GC_SECTIONS */
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT ""
@@ -542,3 +610,163 @@
 /* Define to the type of an unsigned integer type wide enough to hold a
    pointer, if such a type exists, and if the system does not define it. */
 /* #undef uintptr_t */
+
+#ifndef noreturn_func
+# ifdef HAVE_FUNC_ATTRIBUTE_NORETURN
+#  define noreturn_func __attribute__((noreturn))
+# else
+#  define noreturn_func
+# endif
+#endif
+
+#ifndef alloc_size_func2_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE2_ALLOC_SIZE
+#  define alloc_size_func2_ptr(x1,x2) __attribute__((alloc_size(x1,x2)))
+# else
+#  define alloc_size_func2_ptr(x1,x2)
+# endif
+#endif
+
+#ifndef end_with_null
+# ifdef HAVE_FUNC_ATTRIBUTE_SENTINEL
+#  define end_with_null __attribute__((sentinel))
+# else
+#  define end_with_null
+# endif
+#endif
+
+#ifndef end_with_null_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_SENTINEL
+#  define end_with_null_ptr __attribute__((sentinel))
+# else
+#  define end_with_null_ptr
+# endif
+#endif
+
+#ifndef format_func3
+# ifdef HAVE_FUNC_ATTRIBUTE3_FORMAT
+#  define format_func3(x1,x2,x3) __attribute__((format(x1,x2,x3)))
+# else
+#  define format_func3(x1,x2,x3)
+# endif
+#endif
+
+#ifndef format_func3_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE3_FORMAT
+#  define format_func3_ptr(x1,x2,x3) __attribute__((format(x1,x2,x3)))
+# else
+#  define format_func3_ptr(x1,x2,x3)
+# endif
+#endif
+
+#ifndef const_func
+# ifdef HAVE_FUNC_ATTRIBUTE_CONST
+#  define const_func __attribute__((const))
+# else
+#  define const_func
+# endif
+#endif
+
+#ifndef const_func_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_CONST
+#  define const_func_ptr __attribute__((const))
+# else
+#  define const_func_ptr
+# endif
+#endif
+
+#ifndef pure_func
+# ifdef HAVE_FUNC_ATTRIBUTE_PURE
+#  define pure_func __attribute__((pure))
+# else
+#  define pure_func
+# endif
+#endif
+
+#ifndef pure_func_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_PURE
+#  define pure_func_ptr __attribute__((pure))
+# else
+#  define pure_func_ptr
+# endif
+#endif
+
+#ifndef unlikely_func
+# ifdef HAVE_FUNC_ATTRIBUTE_COLD
+#  define unlikely_func __attribute__((cold))
+# else
+#  define unlikely_func
+# endif
+#endif
+
+#ifndef noreturn_func_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_NORETURN
+#  define noreturn_func_ptr __attribute__((noreturn))
+# else
+#  define noreturn_func_ptr
+# endif
+#endif
+
+#ifndef unlikely_func_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_COLD
+#  define unlikely_func_ptr __attribute__((cold))
+# else
+#  define unlikely_func_ptr
+# endif
+#endif
+
+#ifndef never_null
+# ifdef HAVE_FUNC_ATTRIBUTE_RETURNS_NONNULL
+#  define never_null __attribute__((returns_nonnull))
+# else
+#  define never_null
+# endif
+#endif
+
+#ifndef never_null_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_RETURNS_NONNULL
+#  define never_null_ptr __attribute__((returns_nonnull))
+# else
+#  define never_null_ptr
+# endif
+#endif
+
+#ifndef malloc_func
+# ifdef HAVE_FUNC_ATTRIBUTE_MALLOC
+#  define malloc_func __attribute__((malloc))
+# else
+#  define malloc_func
+# endif
+#endif
+
+#ifndef malloc_func_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE_MALLOC
+#  define malloc_func_ptr __attribute__((malloc))
+# else
+#  define malloc_func_ptr
+# endif
+#endif
+
+#ifndef alloc_size_func1
+# ifdef HAVE_FUNC_ATTRIBUTE1_ALLOC_SIZE
+#  define alloc_size_func1(x1) __attribute__((alloc_size(x1)))
+# else
+#  define alloc_size_func1(x1)
+# endif
+#endif
+
+#ifndef alloc_size_func1_ptr
+# ifdef HAVE_FUNC_PTR_ATTRIBUTE1_ALLOC_SIZE
+#  define alloc_size_func1_ptr(x1) __attribute__((alloc_size(x1)))
+# else
+#  define alloc_size_func1_ptr(x1)
+# endif
+#endif
+
+#ifndef alloc_size_func2
+# ifdef HAVE_FUNC_ATTRIBUTE2_ALLOC_SIZE
+#  define alloc_size_func2(x1,x2) __attribute__((alloc_size(x1,x2)))
+# else
+#  define alloc_size_func2(x1,x2)
+# endif
+#endif
