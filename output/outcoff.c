@@ -38,10 +38,7 @@
 
 #include "compiler.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include "nctype.h"
 #include <time.h>
 
 #include "nasm.h"
@@ -291,7 +288,7 @@ static inline int32_t coff_sectalign_flags(unsigned int align)
     return (ilog2_32(align) + 1) << 20;
 }
 
-static int32_t coff_section_names(char *name, int pass, int *bits)
+static int32_t coff_section_names(char *name, int *bits)
 {
     char *p;
     uint32_t flags, align_and = ~0L, align_or = 0L;
@@ -316,8 +313,7 @@ static int32_t coff_section_names(char *name, int pass, int *bits)
         *p++ = '\0';
     if (strlen(name) > 8) {
         if (!win32 && !win64) {
-            nasm_error(ERR_WARNING,
-                       "COFF section names limited to 8 characters:  truncating");
+            nasm_warn(WARN_OTHER, "COFF section names limited to 8 characters:  truncating");
             name[8] = '\0';
         }
     }
@@ -343,8 +339,8 @@ static int32_t coff_section_names(char *name, int pass, int *bits)
                 flags = RDATA_FLAGS;
             else {
                 flags = DATA_FLAGS;     /* gotta do something */
-                nasm_error(ERR_NONFATAL, "standard COFF does not support"
-                      " read-only data sections");
+                nasm_nonfatal("standard COFF does not support"
+                              " read-only data sections");
             }
         } else if (!nasm_stricmp(q, "bss")) {
             flags = BSS_FLAGS;
@@ -353,25 +349,24 @@ static int32_t coff_section_names(char *name, int pass, int *bits)
                 flags = INFO_FLAGS;
             else {
                 flags = DATA_FLAGS;     /* gotta do something */
-                nasm_error(ERR_NONFATAL, "standard COFF does not support"
-                      " informational sections");
+                nasm_nonfatal("standard COFF does not support"
+                              " informational sections");
             }
         } else if (!nasm_strnicmp(q, "align=", 6)) {
             if (!(win32 | win64))
-                nasm_error(ERR_NONFATAL, "standard COFF does not support"
-                      " section alignment specification");
+                nasm_nonfatal("standard COFF does not support"
+                              " section alignment specification");
             else {
                 if (q[6 + strspn(q + 6, "0123456789")])
-                    nasm_error(ERR_NONFATAL,
-                          "argument to `align' is not numeric");
+                    nasm_nonfatal("argument to `align' is not numeric");
                 else {
                     unsigned int align = atoi(q + 6);
                     if (!align || ((align - 1) & align))
-                        nasm_error(ERR_NONFATAL, "argument to `align' is not a"
-                              " power of two");
+                        nasm_nonfatal("argument to `align' is not a"
+                                      " power of two");
                     else if (align > 64)
-                        nasm_error(ERR_NONFATAL, "Win32 cannot align sections"
-                              " to better than 64-byte boundaries");
+                        nasm_nonfatal("Win32 cannot align sections"
+                                      " to better than 64-byte boundaries");
                     else {
                         align_and = ~0x00F00000L;
                         align_or  = coff_sectalign_flags(align);
@@ -404,45 +399,51 @@ static int32_t coff_section_names(char *name, int pass, int *bits)
             coff_sects[i]->flags = flags;
         coff_sects[i]->flags &= align_and;
         coff_sects[i]->flags |= align_or;
-    } else if (pass == 1) {
-        /* Check if any flags are specified */
-        if (flags) {
-            unsigned int align_flags = flags & IMAGE_SCN_ALIGN_MASK;
+    } else if (flags) {
+        /* Check if any flags are respecified */
+        unsigned int align_flags = flags & IMAGE_SCN_ALIGN_MASK;
 
-            /* Warn if non-alignment flags differ */
-            if ((flags ^ coff_sects[i]->flags) & ~IMAGE_SCN_ALIGN_MASK) {
-                nasm_error(ERR_WARNING, "section attributes ignored on"
-                    " redeclaration of section `%s'", name);
+        /* Warn if non-alignment flags differ */
+        if ((flags ^ coff_sects[i]->flags) & ~IMAGE_SCN_ALIGN_MASK &&
+            coff_sects[i]->pass_last_seen == pass_count()) {
+            nasm_warn(WARN_OTHER, "section attributes changed on"
+                      " redeclaration of section `%s'", name);
+        }
+        /* Check if alignment might be needed */
+        if (align_flags > IMAGE_SCN_ALIGN_1BYTES) {
+            unsigned int sect_align_flags = coff_sects[i]->flags & IMAGE_SCN_ALIGN_MASK;
+
+            /* Compute the actual alignment */
+            unsigned int align = 1u << ((align_flags - IMAGE_SCN_ALIGN_1BYTES) >> 20);
+
+            /* Update section header as needed */
+            if (align_flags > sect_align_flags) {
+                coff_sects[i]->flags = (coff_sects[i]->flags & ~IMAGE_SCN_ALIGN_MASK) | align_flags;
             }
-            /* Check if alignment might be needed */
-            if (align_flags > IMAGE_SCN_ALIGN_1BYTES) {
-                unsigned int sect_align_flags = coff_sects[i]->flags & IMAGE_SCN_ALIGN_MASK;
+            /* Check if not already aligned */
+            if (coff_sects[i]->len % align) {
+                unsigned int padding = (align - coff_sects[i]->len) % align;
+                /* We need to write at most 8095 bytes */
+                char         buffer[8095];
 
-                /* Compute the actual alignment */
-                unsigned int align = 1u << ((align_flags - IMAGE_SCN_ALIGN_1BYTES) >> 20);
+                nasm_assert(padding <= sizeof buffer);
 
-                /* Update section header as needed */
-                if (align_flags > sect_align_flags) {
-                    coff_sects[i]->flags = (coff_sects[i]->flags & ~IMAGE_SCN_ALIGN_MASK) | align_flags;
+                if (pass_final())
+                    nasm_nonfatal("section alignment changed during code generation");
+
+                if (coff_sects[i]->flags & IMAGE_SCN_CNT_CODE) {
+                    /* Fill with INT 3 instructions */
+                    memset(buffer, 0xCC, padding);
+                } else {
+                    memset(buffer, 0x00, padding);
                 }
-                /* Check if not already aligned */
-                if (coff_sects[i]->len % align) {
-                    unsigned int padding = (align - coff_sects[i]->len) % align;
-                    /* We need to write at most 8095 bytes */
-                    char buffer[8095];
-                    if (coff_sects[i]->flags & IMAGE_SCN_CNT_CODE) {
-                        /* Fill with INT 3 instructions */
-                        memset(buffer, 0xCC, padding);
-                    } else {
-                        memset(buffer, 0x00, padding);
-                    }
-                    saa_wbytes(coff_sects[i]->data, buffer, padding);
-                    coff_sects[i]->len += padding;
-                }
+                saa_wbytes(coff_sects[i]->data, buffer, padding);
+                coff_sects[i]->len += padding;
             }
         }
     }
 
+    coff_sects[i]->pass_last_seen = pass_count();
     return coff_sects[i]->index;
 }
 
@@ -453,12 +454,12 @@ static void coff_deflabel(char *name, int32_t segment, int64_t offset,
     struct coff_Symbol *sym;
 
     if (special)
-        nasm_error(ERR_NONFATAL, "COFF format does not support any"
-              " special symbol types");
+        nasm_nonfatal("COFF format does not support any"
+                      " special symbol types");
 
     if (name[0] == '.' && name[1] == '.' && name[2] != '@') {
         if (strcmp(name,WRT_IMAGEBASE))
-            nasm_error(ERR_NONFATAL, "unrecognized special symbol `%s'", name);
+            nasm_nonfatal("unrecognized special symbol `%s'", name);
         return;
     }
 
@@ -556,7 +557,7 @@ static void coff_out(int32_t segto, const void *data,
 
     if (wrt != NO_SEG && !win64) {
         wrt = NO_SEG;           /* continue to do _something_ */
-        nasm_error(ERR_NONFATAL, "WRT not supported by COFF output formats");
+        nasm_nonfatal("WRT not supported by COFF output formats");
     }
 
     s = NULL;
@@ -568,7 +569,7 @@ static void coff_out(int32_t segto, const void *data,
     }
     if (!s) {
         int tempint;            /* ignored */
-        if (segto != coff_section_names(".text", 2, &tempint))
+        if (segto != coff_section_names(".text", &tempint))
             nasm_panic("strange segment conditions in COFF driver");
         else
             s = coff_sects[coff_nsects - 1];
@@ -581,8 +582,8 @@ static void coff_out(int32_t segto, const void *data,
     }
 
     if (!s->data && type != OUT_RESERVE) {
-        nasm_error(ERR_WARNING, "attempt to initialize memory in"
-              " BSS section `%s': ignored", s->name);
+        nasm_warn(WARN_OTHER, "attempt to initialize memory in"
+                  " BSS section `%s': ignored", s->name);
         s->len += realsize(type, size);
         return;
     }
@@ -605,8 +606,8 @@ static void coff_out(int32_t segto, const void *data,
 
     if (type == OUT_RESERVE) {
         if (s->data) {
-            nasm_error(ERR_WARNING, "uninitialised space declared in"
-                  " non-BSS section `%s': zeroing", s->name);
+            nasm_warn(WARN_ZEROING, "uninitialised space declared in"
+                      " non-BSS section `%s': zeroing", s->name);
             coff_sect_write(s, NULL, size);
         } else
             s->len += size;
@@ -616,17 +617,16 @@ static void coff_out(int32_t segto, const void *data,
         int asize = abs((int)size);
         if (!win64) {
             if (asize != 4 && (segment != NO_SEG || wrt != NO_SEG)) {
-                nasm_error(ERR_NONFATAL, "COFF format does not support non-32-bit"
-                      " relocations");
+                nasm_nonfatal("COFF format does not support non-32-bit"
+                              " relocations");
             } else {
                 int32_t fix = 0;
                 if (segment != NO_SEG || wrt != NO_SEG) {
                     if (wrt != NO_SEG) {
-                        nasm_error(ERR_NONFATAL, "COFF format does not support"
-                              " WRT types");
+                        nasm_nonfatal("COFF format does not support WRT types");
                     } else if (segment % 2) {
-                        nasm_error(ERR_NONFATAL, "COFF format does not support"
-                              " segment base references");
+                        nasm_nonfatal("COFF format does not support"
+                                      " segment base references");
                     } else
                         fix = coff_add_reloc(s, segment, IMAGE_REL_I386_DIR32);
                 }
@@ -639,8 +639,8 @@ static void coff_out(int32_t segto, const void *data,
             p = mydata;
             if (asize == 8) {
                 if (wrt == imagebase_sect) {
-                    nasm_error(ERR_NONFATAL, "operand size mismatch: 'wrt "
-                               WRT_IMAGEBASE "' is a 32-bit operand");
+                    nasm_nonfatal("operand size mismatch: 'wrt "
+                                  WRT_IMAGEBASE "' is a 32-bit operand");
                 }
                 fix = coff_add_reloc(s, segment, IMAGE_REL_AMD64_ADDR64);
                 WRITEDLONG(p, *(int64_t *)data + fix);
@@ -654,19 +654,18 @@ static void coff_out(int32_t segto, const void *data,
             }
         }
     } else if (type == OUT_REL2ADR) {
-        nasm_error(ERR_NONFATAL, "COFF format does not support 16-bit"
-              " relocations");
+        nasm_nonfatal("COFF format does not support 16-bit relocations");
     } else if (type == OUT_REL4ADR) {
         if (segment == segto && !(win64))  /* Acceptable for RIP-relative */
             nasm_panic("intra-segment OUT_REL4ADR");
         else if (segment == NO_SEG && win32)
-            nasm_error(ERR_NONFATAL, "Win32 COFF does not correctly support"
-                  " relative references to absolute addresses");
+            nasm_nonfatal("Win32 COFF does not correctly support"
+                          " relative references to absolute addresses");
         else {
             int32_t fix = 0;
             if (segment != NO_SEG && segment % 2) {
-                nasm_error(ERR_NONFATAL, "COFF format does not support"
-                      " segment base references");
+                nasm_nonfatal("COFF format does not support"
+                              " segment base references");
             } else
                 fix = coff_add_reloc(s, segment,
                         win64 ? IMAGE_REL_AMD64_REL32 : IMAGE_REL_I386_REL32);
@@ -755,14 +754,21 @@ static void BuildExportTable(STRING **rvp)
 }
 
 static enum directive_result
-coff_directives(enum directive directive, char *value, int pass)
+coff_directives(enum directive directive, char *value)
 {
     switch (directive) {
     case D_EXPORT:
     {
         char *q, *name;
 
-        if (pass == 2)
+        /*
+         * XXX: pass_first() is really wrong here, but AddExport()
+         * needs to be modified to handle duplicate calls for the
+         * same value in order to change that. The right thing to do
+         * is probably to mark a label as an export in the label
+         * structure, in case the label doesn't actually exist.
+         */
+        if (!pass_first())
             return DIRR_OK;           /* ignore in pass two */
         name = q = value;
         while (*q && !nasm_isspace(*q))
@@ -774,11 +780,11 @@ coff_directives(enum directive directive, char *value, int pass)
         }
 
         if (!*name) {
-            nasm_error(ERR_NONFATAL, "`export' directive requires export name");
+            nasm_nonfatal("`export' directive requires export name");
             return DIRR_ERROR;
         }
         if (*q) {
-            nasm_error(ERR_NONFATAL, "unrecognized export qualifier `%s'", q);
+            nasm_nonfatal("unrecognized export qualifier `%s'", q);
             return DIRR_ERROR;
         }
         AddExport(name);
@@ -802,10 +808,10 @@ coff_directives(enum directive directive, char *value, int pass)
                 sxseg = i;
         }
         /*
-         * pass0 == 2 is the only time when the full set of symbols are
-         * guaranteed to be present; it is the final output pass.
+         * pass_final() is the only time when the full set of symbols are
+         * guaranteed to be present as it is the final output pass.
          */
-        if (pass0 == 2) {
+        if (pass_final()) {
             uint32_t n;
             saa_rewind(coff_syms);
             for (n = 0; n < coff_nsyms; n++) {
@@ -840,8 +846,7 @@ coff_directives(enum directive directive, char *value, int pass)
                 }
             }
             if (n == coff_nsyms) {
-                nasm_error(ERR_NONFATAL,
-                           "`safeseh' directive requires valid symbol");
+                nasm_nonfatal("`safeseh' directive requires valid symbol");
                 return DIRR_ERROR;
             }
         }
@@ -1129,8 +1134,13 @@ extern macros_t coff_stdmac[];
 
 #ifdef OF_COFF
 
+static const struct pragma_facility coff_pragma_list[] = {
+    { "coff", NULL },
+    { NULL,   NULL }
+};
+
 const struct ofmt of_coff = {
-    "COFF (i386) object files (e.g. DJGPP for DOS)",
+    "COFF (i386) (DJGPP, some Unix variants)",
     "coff",
     ".o",
     0,
@@ -1149,19 +1159,25 @@ const struct ofmt of_coff = {
     null_segbase,
     coff_directives,
     coff_cleanup,
-    NULL                        /* pragma list */
+    coff_pragma_list
 };
 
 #endif
 
-extern const struct dfmt df_cv8;
 
 #ifdef OF_WIN32
 
+static const struct pragma_facility coff_win_pragma_list[] = {
+    { "win",  NULL },
+    { "coff", NULL },
+    { NULL,   NULL }
+};
+
+extern const struct dfmt df_cv8;
 static const struct dfmt * const win32_debug_arr[2] = { &df_cv8, NULL };
 
 const struct ofmt of_win32 = {
-    "Microsoft Win32 (i386) object files",
+    "Microsoft extended COFF for Win32 (i386)",
     "win32",
     ".obj",
     0,
@@ -1180,7 +1196,7 @@ const struct ofmt of_win32 = {
     null_segbase,
     coff_directives,
     coff_cleanup,
-    NULL                        /* pragma list */
+    coff_win_pragma_list
 };
 
 #endif
@@ -1190,7 +1206,7 @@ const struct ofmt of_win32 = {
 static const struct dfmt * const win64_debug_arr[2] = { &df_cv8, NULL };
 
 const struct ofmt of_win64 = {
-    "Microsoft Win64 (x86-64) object files",
+    "Microsoft extended COFF for Win64 (x86-64)",
     "win64",
     ".obj",
     0,
@@ -1209,7 +1225,7 @@ const struct ofmt of_win64 = {
     null_segbase,
     coff_directives,
     coff_cleanup,
-    NULL                        /* pragma list */
+    coff_win_pragma_list
 };
 
 #endif

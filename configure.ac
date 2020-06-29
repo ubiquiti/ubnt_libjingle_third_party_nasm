@@ -1,10 +1,10 @@
 dnl Process this file with autoconf 2.69 or later to produce
 dnl a configure script.
 AC_PREREQ(2.69)
-AC_INIT(config/config.h.in)
-AC_CONFIG_HEADERS(config/config.h)
-
+AC_INIT([config/config.h.in])
+AC_CONFIG_HEADERS([config/config.h])
 AC_PREFIX_PROGRAM(nasm)
+AC_CONFIG_AUX_DIR(autoconf/helpers)
 
 dnl Save initial CFLAGS, to see if -g -O2 came from configure or not
 pa_init_cflags="$CFLAGS"
@@ -15,6 +15,9 @@ dnl the best very slow and doesn't buy us a single thing at all.
 WINELOADER=/dev/null
 export WINELOADER
 
+dnl Get the canonical target system name
+AC_CANONICAL_HOST
+
 dnl Checks for programs and enable necessary CC extensions
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
@@ -23,6 +26,7 @@ AC_PROG_CC_STDC
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+AC_PROG_MKDIR_P
 
 pa_no_optimize=false
 
@@ -41,6 +45,11 @@ PA_ARG_ENABLED([gdb],
 AS_IF([$pa_no_optimize],
       [PA_ADD_CFLAGS([-O0])
        PA_ADD_CFLAGS([-fno-omit-frame-pointer])])
+
+dnl Profiling
+PA_ARG_ENABLED([profiling],
+ [compile with profiling (-pg option)],
+ [PA_ADD_CFLAGS([-pg])])
 
 dnl Abort on panic
 PA_ARG_ENABLED([panic-abort],
@@ -82,14 +91,56 @@ dnl Look for programs...
 AC_CHECK_PROGS(NROFF,    nroff,    false)
 AC_CHECK_PROGS(ASCIIDOC, asciidoc, false)
 AC_CHECK_PROGS(XMLTO,    xmlto,    false)
+AC_CHECK_PROGS(XZ,       xz,       false)
 
 dnl Check for progs needed for manpage generation
-AS_IF([test $ASCIIDOC = false],
-  [AC_MSG_WARN([No asciidoc package found])]
+MANPAGES=manpages
+AS_IF([test x$ASCIIDOC = xfalse],
+  [AC_MSG_WARN([No asciidoc package found, cannot build man pages])
+   MANPAGES='']
 )
-AS_IF([test $XMLTO = false],
-  [AC_MSG_WARN([No xmlto package found])]
+AS_IF([test x"$XMLTO" = xfalse],
+  [AC_MSG_WARN([No xmlto package found, cannot build man pages])
+   MANPAGES='']
 )
+AC_SUBST([MANPAGES])
+
+dnl Don't create .pdf.xz if there is no xz
+AS_IF([test x"$XZ" = xfalse],
+  [],
+  [XZFILES=xzfiles])
+AC_SUBST([XZFILES])
+
+dnl Can't create NSIS package if there is no makensis
+dnl ... but it only applies to a Windows target ...
+dnl Note: AC_CHECK_TOOLS is supposed to check for the "plain"
+dnl version of the program name, but it doesn't seem to.
+AC_ARG_WITH([nsis],
+[AS_HELP_STRING([[--with-nsis[=makensis]]],
+ [build an install .exe using NSIS on Windows hosts])],
+ [], [with_nsis=yes])
+AS_IF([test x"$MAKENSIS" = x], [],
+      [AS_IF([test x"$with_nsis" = xno], []
+             [with_nsis="$MAKENSIS"])])
+
+MAKENSIS=false
+
+AS_CASE([$host],
+	[*-win* | *-mingw*],
+	[AS_IF([test x"$with_nsis" = xno], [],
+	 [NSIS=nsis
+	  AS_IF([test x"$with_nsis" = xyes],
+	  [AC_CHECK_TOOL(MAKENSIS_TOOL, makensis, false)
+	   MAKENSIS="$MAKENSIS_TOOL"
+	   AS_IF([test x"$MAKENSIS" = xfalse],
+	       [AC_CHECK_PROGS(MAKENSIS_PLAIN, makensis, false)
+	         MAKENSIS="$MAKENSIS_PLAIN"])
+	   AS_IF([test x"$MAKENSIS" = xfalse],
+	         [AC_MSG_WARN([no makensis found, cannot build installer])
+	          NSIS=''])],
+	  [MAKENSIS="$with_nsis"])])])
+AC_SUBST([MAKENSIS])
+AC_SUBST([NSIS])
 
 dnl Check for host compiler tools
 AC_CHECK_TOOL(AR, ar)
@@ -108,6 +159,7 @@ AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(sys/mman.h)
 AC_CHECK_HEADERS(sys/types.h)
 AC_CHECK_HEADERS(sys/stat.h)
+AC_CHECK_HEADERS(sys/resource.h)
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strcasecmp stricmp)
@@ -115,9 +167,13 @@ AC_CHECK_FUNCS(strncasecmp strnicmp)
 AC_CHECK_FUNCS(strsep)
 AC_CHECK_FUNCS(strnlen)
 AC_CHECK_FUNCS(strrchrnul)
+AC_CHECK_FUNCS(iscntrl)
+AC_CHECK_FUNCS(isascii)
+AC_CHECK_FUNCS(mempcpy)
 
 AC_CHECK_FUNCS(getuid)
 AC_CHECK_FUNCS(getgid)
+AC_CHECK_FUNCS(getrlimit)
 
 AC_CHECK_FUNCS(realpath)
 AC_CHECK_FUNCS(canonicalize_file_name)
@@ -129,7 +185,6 @@ AC_CHECK_FUNCS([_fseeki64])
 AC_CHECK_FUNCS([ftruncate _chsize _chsize_s])
 AC_CHECK_FUNCS([fileno _fileno])
 
-AC_CHECK_FUNCS(_filelengthi64)
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(getpagesize)
 AC_CHECK_FUNCS(sysconf)
@@ -157,6 +212,7 @@ AC_CHECK_TYPES([struct _stati64])
 AC_CHECK_TYPES([struct stat])
 AC_CHECK_FUNCS([stat _stati64])
 AC_CHECK_FUNCS([fstat _fstati64])
+AC_CHECK_FUNCS([S_ISREG])
 
 dnl Check for functions that might not be declared in the headers for
 dnl various idiotic reasons (mostly because of library authors
@@ -205,9 +261,10 @@ PA_HAVE_FUNC(_byteswap_ulong, (0))
 PA_HAVE_FUNC(_byteswap_uint64, (0))
 
 dnl
-dnl Check for __builtin_constant_p()
+dnl Some rather useful gcc extensions...
 dnl
 PA_HAVE_FUNC(__builtin_constant_p, (0))
+PA_HAVE_FUNC(__builtin_choose_expr, (0,1,2))
 
 dnl
 dnl Check for supported gcc attributes; some compilers (e.g. Sun CC)
@@ -216,32 +273,34 @@ dnl some other features of gcc.
 dnl
 PA_ADD_CFLAGS([-Werror=attributes])
 PA_FUNC_ATTRIBUTE(noreturn)
-PA_FUNC_ATTRIBUTE(returns_nonnull)
+PA_FUNC_ATTRIBUTE(returns_nonnull,,,,,never_null)
 PA_FUNC_ATTRIBUTE(malloc)
-PA_FUNC_ATTRIBUTE(alloc_size, (1))
-PA_FUNC_ATTRIBUTE(sentinel,,, [const char *, ...], ["a","b",NULL])
-PA_FUNC_ATTRIBUTE(format, [(printf,1,2)], int, [const char *, ...], ["%d",1])
+PA_FUNC_ATTRIBUTE(alloc_size,[1])
+PA_FUNC_ATTRIBUTE(alloc_size,[1,2])
+PA_FUNC_ATTRIBUTE(sentinel,,, [const char *, ...], ["a","b",NULL],end_with_null)
+PA_FUNC_ATTRIBUTE(format, [printf,1,2], int, [const char *, ...], ["%d",1])
 PA_FUNC_ATTRIBUTE(const)
 PA_FUNC_ATTRIBUTE(pure)
-PA_FUNC_ATTRIBUTE(cold)
+PA_FUNC_ATTRIBUTE(cold,,,,,unlikely_func)
 PA_FUNC_ATTRIBUTE_ERROR
 
 dnl
 dnl support function sections (if available)
 dnl
-PA_ARG_ENABLED([sections],
- [compile with function/data section support],
- [PA_ADD_CLDFLAGS([-ffunction-sections])
-  PA_ADD_CLDFLAGS([-fdata-sections])
-  PA_ADD_CLDFLAGS([-Wl,--gc-sections])],
- [])
+PA_ARG_DISABLED([sections],
+ [do not try to compile with function/data section support],
+ [],
+ [PA_ADD_CFLAGS([-ffunction-sections])
+  PA_ADD_CFLAGS([-fdata-sections])
+  PA_ADD_LDFLAGS([-Wl,--gc-sections])]
+ )
 
 dnl
 dnl support LTO
 dnl
 PA_ARG_ENABLED([lto],
  [compile with gcc-style link time optimization],
- [PA_ADD_CLDFLAGS([-flto])
+ [PA_ADD_CFLAGS([-flto])
   dnl Note: we use _PROG rather than _TOOL since we are prepending the full
   dnl CC name which ought to already contain the host triplet if needed
   ccbase=`echo "$CC" | awk '{ print $1; }'`
@@ -256,30 +315,38 @@ dnl
 PA_ARG_ENABLED([sanitizer],
  [compile with sanitizers enabled],
  [PA_ADD_CFLAGS([-fno-omit-frame-pointer])
-  PA_ADD_CLDFLAGS([-fsanitize=address])
-  PA_ADD_CLDFLAGS([-fsanitize=undefined])])
+  PA_ADD_CFLAGS([-fsanitize=address])
+  PA_ADD_CFLAGS([-fsanitize=undefined])])
 
 dnl
 dnl Don't make symbols visible, there is no point and it just
 dnl makes the code slower.
 dnl
-PA_ADD_CLDFLAGS([-fvisibility=hidden])
+PA_ADD_CFLAGS([-fvisibility=hidden])
 
 dnl If we have gcc, add appropriate code cleanliness options
-PA_ADD_CFLAGS([-W])
 PA_ADD_CFLAGS([-Wall])
-PA_ADD_CFLAGS([-pedantic])
+PA_ARG_DISABLED([pedantic],
+[disable some extra paranoid compiler warnings],
+[],
+[PA_ADD_CFLAGS([-W])
+ PA_ADD_CFLAGS([-pedantic])
+ PA_ADD_CFLAGS([-Wc90-c99-compat])])
 dnl LLVM doesn't error out on invalid -W options unless this option is
 dnl specified first.  Enable this so this script can actually discover
 dnl which -W options are possible for this compiler.
 PA_ADD_CFLAGS([-Werror=unknown-warning-option])
 dnl Suppress format warning on Windows targets due to their <inttypes.h>
 PA_ADD_CFLAGS([-Wpedantic-ms-format],[-Wno-pedantic-ms-format])
-PA_ADD_CFLAGS([-Wc90-c99-compat])
 PA_ADD_CFLAGS([-Wlong-long],[-Wno-long-long])
 dnl This is needed because we intentionally expect strncpy() to fill
 dnl in a zero-padded (not zero-terminated) buffer in several backends
 PA_ADD_CFLAGS([-Wstringop-truncation],[-Wno-stringop-truncation])
+dnl This is needed because we assume 2's-completement signed arithmetic;
+dnl on compilers with gcc-like command line syntax we pass the -fwrapv
+dnl option for exactly that reason.
+PA_ADD_CFLAGS([-Wshift-negative-value],[-Wno-shift-negative-value])
+
 dnl PA_ADD_CFLAGS([-Wwrite-strings])
 PA_ARG_ENABLED([werror],
  [compile with -Werror to error out on any warning],
@@ -308,5 +375,5 @@ dnl support ccache
 dnl
 PA_ARG_ENABLED([ccache], [compile with ccache], [CC="ccache $CC"], [])
 
-AC_OUTPUT_COMMANDS([mkdir -p config nasmlib nsis output stdlib x86 asm disasm rdoff macros common])
-AC_OUTPUT(Makefile doc/Makefile)
+AC_CONFIG_FILES([Makefile doc/Makefile])
+AC_OUTPUT
