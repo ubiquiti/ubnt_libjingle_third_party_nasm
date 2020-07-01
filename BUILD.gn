@@ -107,8 +107,8 @@ if (current_toolchain == host_toolchain) {
     sources += [
       "config/config-linux.h",
       "config/config-mac.h",
+      "config/config-win.h",
       "config/config.h",
-      "config/msvc.h",
     ]
 
     configs -= configs_to_delete
