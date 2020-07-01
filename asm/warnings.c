@@ -1,8 +1,9 @@
 #include "error.h"
 
-const char * const warning_name[35] = {
+const char * const warning_name[36] = {
 	NULL,
 	"bnd",
+	"db-empty",
 	"environment",
 	"float-denorm",
 	"float-overflow",
@@ -38,10 +39,11 @@ const char * const warning_name[35] = {
 	"all"
 };
 
-const struct warning_alias warning_alias[38] = {
+const struct warning_alias warning_alias[39] = {
 	{ "all",                      WARN_IDX_ALL },
 	{ "bad-pragma",               WARN_IDX_PRAGMA_BAD },
 	{ "bnd",                      WARN_IDX_BND },
+	{ "db-empty",                 WARN_IDX_DB_EMPTY },
 	{ "environment",              WARN_IDX_ENVIRONMENT },
 	{ "float-denorm",             WARN_IDX_FLOAT_DENORM },
 	{ "float-overflow",           WARN_IDX_FLOAT_OVERFLOW },
@@ -79,9 +81,10 @@ const struct warning_alias warning_alias[38] = {
 	{ "zext-reloc",               WARN_IDX_ZEXT_RELOC }
 };
 
-const char * const warning_help[35] = {
+const char * const warning_help[36] = {
 	NULL,
 	"invalid BND prefixes",
+	"no operand for data declaration",
 	"nonexistent environment variable",
 	"floating point denormal",
 	"floating point overflow",
@@ -117,7 +120,8 @@ const char * const warning_help[35] = {
 	"all possible warnings"
 };
 
-const uint8_t warning_default[34] = {
+const uint8_t warning_default[35] = {
+	WARN_INIT_ON,
 	WARN_INIT_ON,
 	WARN_INIT_ON,
 	WARN_INIT_ON,
@@ -154,4 +158,4 @@ const uint8_t warning_default[34] = {
 	WARN_INIT_ON
 };
 
-uint8_t warning_state[34];	/* Current state */
+uint8_t warning_state[35];	/* Current state */

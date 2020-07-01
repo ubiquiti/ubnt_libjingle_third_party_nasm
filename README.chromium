@@ -1,12 +1,12 @@
 Name: Netwide Assembler
 Short Name: nasm
 URL: https://www.nasm.us/
-Version: 2.15.01 / f0dc62c6a680a3cad5baa39a05c88716fb181806
-CPEPrefix: cpe:/a:nasm:netwide_assembler:2.15.01
+Version: 2.15.02rc2 / 8bc18080fe01906d7582a187ea0d67d316501344
+CPEPrefix: cpe:/a:nasm:netwide_assembler:2.15.02rc2
 License: 2-Clause BSD
 License File: LICENSE
 Security Critical: no
-Source: https://repo.or.cz/nasm.git
+Source: https://github.com/netwide-assembler/nasm
 
 --[ DESCRIPTION ] ------------------
 This contains the source to NASM, the assembler used for parts of Chromium.
@@ -28,7 +28,7 @@ directions in updating below.
 To update, have clang in your system path (from //third_party/llvm-
 build/Release+Asserts/bin) then do the following:
 
-  git remote add upstream https://repo.or.cz/nasm.git
+  git remote add upstream https://github.com/netwide-assembler/nasm.git
   git fetch upstream
   git merge upstream/master
 
