@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------- *
  *
- *   Copyright 2007-2018 The NASM Authors - All Rights Reserved
+ *   Copyright 2007-2020 The NASM Authors - All Rights Reserved
  *   See the file AUTHORS included with the NASM distribution for
  *   the specific copyright holders.
  *
@@ -183,17 +183,34 @@ typedef enum bool { false, true } bool;
 # endif
 #endif
 
+/* Create a NULL pointer of the same type as the address of
+   the argument, without actually evaluating said argument. */
+#define nullas(p) (0 ? &(p) : NULL)
+
+/* Convert an offsetted NULL pointer dereference to a size_t offset.
+   Technically non-portable as taking the offset from a NULL pointer
+   is undefined behavior, but... */
+#define null_offset(p) ((size_t)((const char *)&(p) - (const char *)NULL))
+
 /* Provide a substitute for offsetof() if we don't have one.  This
    variant works on most (but not *all*) systems... */
 #ifndef offsetof
-# define offsetof(t,m) ((size_t)&(((t *)0)->m))
+# define offsetof(t,m) null_offset(((t *)NULL)->m)
 #endif
 
-/* This is like offsetof(), but takes an object rather than a type.
-   Ironically enough this is actually guaranteed to be portable,
-   as far as I know... */
+/* If typeof is defined as a macro, assume we have typeof even if
+   HAVE_TYPEOF is not declared (e.g. due to not using autoconf.) */
+#ifdef typeof
+# define HAVE_TYPEOF 1
+#endif
+
+/* This is like offsetof(), but takes an object rather than a type. */
 #ifndef offsetin
-# define offsetin(p,m)	((const char *)&((p).m) - (const char *)&(p))
+# ifdef HAVE_TYPEOF
+#  define offsetin(p,m) offsetof(typeof(p),m)
+# else
+#  define offsetin(p,m)	null_offset(nullas(p)->m)
+# endif
 #endif
 
 /* The container_of construct: if p is a pointer to member m of
@@ -316,27 +333,6 @@ static inline void *mempcpy(void *dst, const void *src, size_t n)
  */
 #define printf_func(fmt, list)     format_func3(printf,fmt,list)
 #define printf_func_ptr(fmt, list) format_func3_ptr(printf,fmt,list)
-
-/*
- * A static [inline] function which either is currently unused but
- * likely to be used in the future, or used only under some #if
- * combinations.  Mark with this option to suppress compiler
- * warnings.
- *
- * This is better than #if(def) because it still lets the compiler
- * analyze the function for validity, and it works even for the
- * conditional use case.
- *
- * The macro UNUSED is set to 1 if the unused macro is meaningful,
- * otherwise 0; this may be useful in some #if statements.
- */
-#ifdef HAVE_FUNC_ATTRIBUTE_UNUSED
-# define unused __attribute__((unused))
-# define UNUSED 1
-#else
-# define unused
-# define UNUSED 0
-#endif
 
 /* Determine probabilistically if something is a compile-time constant */
 #ifdef HAVE___BUILTIN_CONSTANT_P
