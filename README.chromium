@@ -1,8 +1,8 @@
 Name: Netwide Assembler
 Short Name: nasm
 URL: https://www.nasm.us/
-Version: 2.15.02rc2 / 8bc18080fe01906d7582a187ea0d67d316501344
-CPEPrefix: cpe:/a:nasm:netwide_assembler:2.15.02rc2
+Version: 2.15.03rc5 / a79a700208d771fb3b8e6e7f03fcc195c2d1831c
+CPEPrefix: cpe:/a:nasm:netwide_assembler:2.15.03rc5
 License: 2-Clause BSD
 License File: LICENSE
 Security Critical: no
@@ -42,8 +42,8 @@ build/Release+Asserts/bin) then do the following:
   # You can safely use git cl upload for all of your own modifications past this
   # point; I.e., once you have pushed all the commits from the git merge.
 
-  CC=clang CXX=clang++ ./autogen.sh
-  CC=clang CXX=clang++ ./configure
+  CC=clang CXX=clang++ CFLAGS="-std=c11 -Werror" ./autogen.sh
+  CC=clang CXX=clang++ CFLAGS="-std=c11 -Werror" ./configure
   make perlreq
   ./generate_nasm_sources.py
   git add <any new .c/.h files which show up>

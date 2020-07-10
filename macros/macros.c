@@ -100,17 +100,18 @@
 #define p_include                205
 #define p_line                   206
 #define p_local                  207
-#define p_pop                    208
-#define p_pragma                 209
-#define p_push                   210
-#define p_rep                    211
-#define p_repl                   212
-#define p_rotate                 213
-#define p_stacksize              214
-#define p_undef                  215
-#define p_undefalias             216
-#define p_use                    217
-#define p_warning                218
+#define p_null                   208
+#define p_pop                    209
+#define p_pragma                 210
+#define p_push                   211
+#define p_rep                    212
+#define p_repl                   213
+#define p_rotate                 214
+#define p_stacksize              215
+#define p_undef                  216
+#define p_undefalias             217
+#define p_use                    218
+#define p_warning                219
 #define p_assign                 220
 #define p_iassign                221
 #define p_defalias               222
@@ -145,10 +146,10 @@ const unsigned char nasm_stdmac_version[] = {
     /* From version.mac */
         /*    0 */ p_define,'_','_','?','N','A','S','M','_','M','A','J','O','R','?','_','_',' ','2',EOL,
         /*   20 */ p_define,'_','_','?','N','A','S','M','_','M','I','N','O','R','?','_','_',' ','1','5',EOL,
-        /*   41 */ p_define,'_','_','?','N','A','S','M','_','S','U','B','M','I','N','O','R','?','_','_',' ','1',EOL,
-        /*   64 */ p_define,'_','_','?','N','A','S','M','_','P','A','T','C','H','L','E','V','E','L','?','_','_',' ','9','2',EOL,
-        /*   90 */ p_define,'_','_','?','N','A','S','M','_','V','E','R','S','I','O','N','_','I','D','?','_','_',' ','0','0','2','0','F','0','1','5','C','h',EOL,
-        /*  124 */ p_define,'_','_','?','N','A','S','M','_','V','E','R','?','_','_',' ','\"','2','.','1','5','.','0','2','r','c','2','\"',EOL,
+        /*   41 */ p_define,'_','_','?','N','A','S','M','_','S','U','B','M','I','N','O','R','?','_','_',' ','2',EOL,
+        /*   64 */ p_define,'_','_','?','N','A','S','M','_','P','A','T','C','H','L','E','V','E','L','?','_','_',' ','9','5',EOL,
+        /*   90 */ p_define,'_','_','?','N','A','S','M','_','V','E','R','S','I','O','N','_','I','D','?','_','_',' ','0','0','2','0','F','0','2','5','F','h',EOL,
+        /*  124 */ p_define,'_','_','?','N','A','S','M','_','V','E','R','?','_','_',' ','\"','2','.','1','5','.','0','3','r','c','5','\"',EOL,
         /*  153 */ EOL
 };
 #endif
@@ -262,30 +263,30 @@ static const unsigned char nasm_usemac_masm[] = {
         /*   90 */ '_','_','?','S','E','C','T','?','_','_',EOL,
         /*  101 */ p_endmacro,EOL,
         /*  103 */ p_imacro,'e','n','d','s',' ','0','+','.','n','o','l','i','s','t',EOL,
-        /*  119 */ p_pragma,'i','g','n','o','r','e',' ','e','n','d','s',' ','%','0','0',EOL,
-        /*  136 */ p_endmacro,EOL,
-        /*  138 */ p_imacro,'p','r','o','c',' ','0','-','*','.','n','o','l','i','s','t',EOL,
-        /*  155 */ p_rep,'%','0',EOL,
-        /*  159 */ p_ifidni,'%','1',',','f','a','r',EOL,
-        /*  167 */ p_idefine,'r','e','t',' ','r','e','t','f',EOL,
-        /*  177 */ p_else,EOL,
-        /*  179 */ p_idefine,'r','e','t',' ','r','e','t','n',EOL,
-        /*  189 */ p_endif,EOL,
-        /*  191 */ p_rotate,'1',EOL,
-        /*  194 */ p_endrep,EOL,
-        /*  196 */ p_endmacro,EOL,
-        /*  198 */ p_imacro,'e','n','d','p',' ','0','.','n','o','l','i','s','t',EOL,
-        /*  213 */ p_pragma,'i','g','n','o','r','e',' ','e','n','d','p',' ','%','0','0',EOL,
-        /*  230 */ p_undef,'r','e','t',EOL,
-        /*  235 */ p_endmacro,EOL,
-        /*  237 */ p_idefine,'p','t','r',' ','_','_','?','m','a','s','m','_','p','t','r','?','_','_',EOL,
-        /*  257 */ p_idefine,'f','l','a','t',' ','_','_','?','m','a','s','m','_','f','l','a','t','?','_','_',EOL,
-        /*  279 */ p_idefine,'o','f','f','s','e','t',EOL,
-        /*  287 */ p_imacro,'e','n','d',' ','0','+','.','n','o','l','i','s','t',EOL,
-        /*  302 */ p_endmacro,EOL,
-        /*  304 */ p_idefine,'t','b','y','t','e',' ','t','w','o','r','d',EOL,
-        /*  317 */ 'd','e','f','a','u','l','t',' ','r','e','l',EOL,
-        /*  329 */ EOL
+        /*  119 */ p_null,'e','n','d','s',' ','%','0','0',EOL,
+        /*  129 */ p_endmacro,EOL,
+        /*  131 */ p_imacro,'p','r','o','c',' ','0','-','*','.','n','o','l','i','s','t',EOL,
+        /*  148 */ p_rep,'%','0',EOL,
+        /*  152 */ p_ifidni,'%','1',',','f','a','r',EOL,
+        /*  160 */ p_idefine,'r','e','t',' ','r','e','t','f',EOL,
+        /*  170 */ p_else,EOL,
+        /*  172 */ p_idefine,'r','e','t',' ','r','e','t','n',EOL,
+        /*  182 */ p_endif,EOL,
+        /*  184 */ p_rotate,'1',EOL,
+        /*  187 */ p_endrep,EOL,
+        /*  189 */ p_endmacro,EOL,
+        /*  191 */ p_imacro,'e','n','d','p',' ','0','.','n','o','l','i','s','t',EOL,
+        /*  206 */ p_null,'e','n','d','p',' ','%','0','0',EOL,
+        /*  216 */ p_undef,'r','e','t',EOL,
+        /*  221 */ p_endmacro,EOL,
+        /*  223 */ p_idefine,'p','t','r',' ','_','_','?','m','a','s','m','_','p','t','r','?','_','_',EOL,
+        /*  243 */ p_idefine,'f','l','a','t',' ','_','_','?','m','a','s','m','_','f','l','a','t','?','_','_',EOL,
+        /*  265 */ p_idefine,'o','f','f','s','e','t',EOL,
+        /*  273 */ p_imacro,'e','n','d',' ','0','+','.','n','o','l','i','s','t',EOL,
+        /*  288 */ p_endmacro,EOL,
+        /*  290 */ p_idefine,'t','b','y','t','e',' ','t','w','o','r','d',EOL,
+        /*  303 */ 'd','e','f','a','u','l','t',' ','r','e','l',EOL,
+        /*  315 */ EOL
 };
 #endif
 
