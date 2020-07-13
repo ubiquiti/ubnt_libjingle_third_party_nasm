@@ -796,7 +796,7 @@ Token *quote_token(Token *t)
  */
 static Token *quote_any_token(Token *t)
 {
-    size_t len;
+    size_t len = t->len;
     char *p;
 
     p = nasm_quote(tok_text(t), &len);
@@ -945,26 +945,12 @@ static char *check_tasm_directive(char *line)
  * flags') into NASM preprocessor line number indications (`%line
  * lineno file').
  */
-static char *prepreproc(char *line)
+static inline char *prepreproc(char *line)
 {
-    int lineno, fnlen;
-    char *fname, *oldline;
-
-    if (line[0] == '#' && line[1] == ' ') {
-        oldline = line;
-        fname = oldline + 2;
-        lineno = atoi(fname);
-        fname += strspn(fname, "0123456789 ");
-        if (*fname == '"')
-            fname++;
-        fnlen = strcspn(fname, "\"");
-        line = nasm_malloc(20 + fnlen);
-        snprintf(line, 20 + fnlen, "%%line %d %.*s", lineno, fnlen, fname);
-        nasm_free(oldline);
-    }
-    if (tasm_compatible_mode)
+    if (unlikely(tasm_compatible_mode))
         return check_tasm_directive(line);
-    return line;
+    else
+        return line;
 }
 
 /*
@@ -2000,6 +1986,16 @@ static char *detoken(Token * tlist, bool expand_locals)
 	    }
 	    break;
 
+        case TOK_INDIRECT:
+            /*
+             * This won't happen in when emitting to the assembler,
+             * but can happen when emitting output for some of the
+             * list options. The token string doesn't actually include
+             * the brackets in this case.
+             */
+            len += 3;           /* %[] */
+            break;
+
 	default:
 	    break;		/* No modifications */
         }
@@ -2019,8 +2015,19 @@ static char *detoken(Token * tlist, bool expand_locals)
 
     p = line = nasm_malloc(len + 1);
 
-    list_for_each(t, tlist)
-	p = mempcpy(p, tok_text(t), t->len);
+    list_for_each(t, tlist) {
+        switch (t->type) {
+        case TOK_INDIRECT:
+            *p++ = '%';
+            *p++ = '[';
+            p = mempcpy(p, tok_text(t), t->len);
+            *p++ = ']';
+            break;
+
+        default:
+            p = mempcpy(p, tok_text(t), t->len);
+        }
+    }
     *p = '\0';
 
     return line;
@@ -3405,6 +3412,14 @@ static int do_directive(Token *tline, Token **output)
     *output = NULL;             /* No output generated */
     origline = tline;
 
+    if (tok_is(tline, '#')) {
+        /* cpp-style line directive */
+        if (!tok_white(tline->next))
+            return NO_DIRECTIVE_FOUND;
+        dname = tok_text(tline);
+        goto pp_line;
+    }
+
     tline = skip_white(tline);
     if (!tline || !tok_type(tline, TOK_PREPROC_ID))
 	return NO_DIRECTIVE_FOUND;
@@ -3427,6 +3442,7 @@ static int do_directive(Token *tline, Token **output)
      * in externally preprocessed sources.
      */
     if (op == PP_LINE) {
+    pp_line:
         /*
          * Syntax is `%line nnn[+mmm] [filename]'
          */
@@ -3457,7 +3473,19 @@ static int do_directive(Token *tline, Token **output)
         tline = skip_white(tline);
         if (tline) {
             if (tline->type == TOK_STRING) {
+                if (dname[0] == '#') {
+                    /* cpp version: treat double quotes like NASM backquotes */
+                    char *txt = tok_text_buf(tline);
+                    if (txt[0] == '"') {
+                        txt[0] = '`';
+                        txt[tline->len - 1] = '`';
+                    }
+                }
                 src_set_fname(unquote_token(tline));
+                /*
+                 * Anything after the string is ignored by design (for cpp
+                 * compatibility and future extensions.)
+                 */
             } else {
                 char *fname = detoken(tline, false);
                 src_set_fname(fname);
