@@ -156,7 +156,7 @@
 
 /* Define to 1 if you have the declaration of `stricmp', and to 0 if you
    don't. */
-#define HAVE_DECL_STRICMP 0
+#define HAVE_DECL_STRICMP 1
 
 /* Define to 1 if you have the declaration of `strlcpy', and to 0 if you
    don't. */
@@ -168,7 +168,7 @@
 
 /* Define to 1 if you have the declaration of `strnicmp', and to 0 if you
    don't. */
-#define HAVE_DECL_STRNICMP 0
+#define HAVE_DECL_STRNICMP 1
 
 /* Define to 1 if you have the declaration of `strnlen', and to 0 if you
    don't. */
