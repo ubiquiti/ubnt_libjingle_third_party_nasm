@@ -48,7 +48,7 @@ build/Release+Asserts/bin) then do the following:
   ./generate_nasm_sources.py
   git add <any new .c/.h files which show up>
 
-  # Copy config/config.h to config-(mac|linux|win).h
+  # Copy config/config.h to config-(mac|linux).h
   # Revert config/config.h to the checked in version
 
   git commit -a
@@ -69,25 +69,7 @@ export SDKROOT=$path_to_chrome_src/build/mac_files/xcode_binaries/Contents/Devel
 
 You can stop after configure. Then just follow the copy instructions above.
 
-*** Temporary Windows Instructions ***
-
-To run the script on Windows, it's easiest to run the following from Linux and
-then copy over the configure and config/config.h.in files to a Windows machine.
-
-  CC=clang-cl CXX=clang-cl ./autogen.sh
-
-Then from "git bash" on the Windows machine:
-
-  CC=clang-cl CXX=clang-cl ./configure
-
-This doesn't always seem to detect snprintf() and vsnprintf() correctly, so you
-may need to modify the HAVE_VSNPRINTF and HAVE_SNPRINTF defines in the resulting
-config.h
-
-You can stop after configure. Then just follow the copy instructions above.
-
 
 --[ TODOS ] ------------------
-- Switch back to using msvc.h instead of generating a custom config.h for
-Windows so we can avoid the crazy build steps :| Tracked by:
-https://bugzilla.nasm.us/show_bug.cgi?id=3392689
+None at this time.
+

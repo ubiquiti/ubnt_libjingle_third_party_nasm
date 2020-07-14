@@ -5,7 +5,8 @@
 #if __APPLE__
 #include "config-mac.h"
 #elif _WIN32
-#include "config-win.h"
+#include "msvc.h"
+#include "unconfig.h"
 #else
 #include "config-linux.h"
 #endif
