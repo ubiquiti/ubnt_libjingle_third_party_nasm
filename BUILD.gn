@@ -38,12 +38,6 @@ if (is_debug) {
     # of highbd_sad4d_sse2.asm on Windows this saved about 15 s.
     configs_to_delete += [ "//build/config/win:default_crt" ]
     configs_to_add += [ "//build/config/win:release_crt" ]
-
-    # Without no_default_deps, an implicit dependency on libc++ is added.
-    # libc++ may have been built referencing the debug CRT, but since we're
-    # explicitly using the release CRT, this would result in undefined symbol
-    # errors when linking, so we need to remove the implicit libc++ dependency.
-    no_default_deps = true
   }
 }
 
@@ -123,5 +117,13 @@ if (current_toolchain == host_toolchain) {
       # Default manifest on Windows (a no-op elsewhere).
       "//build/win:default_exe_manifest",
     ]
+
+    # Without no_default_deps, an implicit dependency on libc++ is added.
+    # libc++ may have been built referencing the debug CRT, but since we're
+    # explicitly using the release CRT, this would result in undefined symbol
+    # errors when linking, so we need to remove the implicit libc++ dependency.
+    # This is also needed to remove some configurations which make nasm's
+    # performance slow.
+    no_default_deps = true
   }
 }
