@@ -60,8 +60,11 @@ if ((is_mac || is_ios) && (current_cpu == "x86" || current_cpu == "x64")) {
     if (target_environment == "device") {
       _nasm_flags += [ "--macho-min-os=ios$ios_deployment_target" ]
     } else {
-      _nasm_flags +=
-          [ "--macho-min-os=ios$ios_deployment_target-$target_environment" ]
+     if (ios_device_name == "appletv") {
+       _nasm_flags += [ "--macho-min-os=tvos$ios_deployment_target-$target_environment" ]
+     } else {
+       _nasm_flags += [ "--macho-min-os=ios$ios_deployment_target-$target_environment" ]
+     }
     }
   }
 } else if (is_posix || is_fuchsia) {
